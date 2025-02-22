@@ -7,18 +7,30 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+/**
+ * Entidade que representa um usuário no sistema.
+ */
 @Entity
 @Table(name = "tbl_user")
 public class User {
-    
+
+    /**
+     * Identificador único do usuário. Gerado automaticamente pelo banco de dados.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Integer id;
 
+    /**
+     * Nome do usuário. Não pode ser nulo e tem um tamanho máximo de 255 caracteres.
+     */
     @Column(name = "user_name", length = 255, nullable = false)
     private String name;
 
+    /**
+     * Endereço de e-mail do usuário. Não pode ser nulo, tem um tamanho máximo de 255 caracteres e deve ser único no sistema.
+     */
     @Column(name = "user_email", length = 255, nullable = false, unique = true)
     private String email;
 
@@ -45,6 +57,4 @@ public class User {
     public void setEmail(String email) {
         this.email = email;
     }
-
-    
 }

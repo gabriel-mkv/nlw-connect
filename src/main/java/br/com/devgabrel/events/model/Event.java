@@ -10,35 +10,65 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+/**
+ * Entidade que representa um evento.
+ */
 @Entity
 @Table(name = "tbl_event")
 public class Event {
+    /**
+     * Identificador único do evento, gerado automaticamente pelo banco de dados.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "event_id")
     private Integer eventId;
-    
+
+    /**
+     * Título do evento. Não pode ser nulo e tem um tamanho máximo de 255 caracteres.
+     */
     @Column(name = "title", length = 255, nullable = false)
     private String title;
-    
+
+    /**
+     * "Pretty name" do evento, usado para URLs amigáveis. Não pode ser nulo, deve ser único e tem um tamanho máximo de 50 caracteres.
+     */
     @Column(name = "pretty_name", length = 50, nullable = false, unique = true)
     private String prettyName;
-    
+
+    /**
+     * Local onde o evento será realizado. Não pode ser nulo e tem um tamanho máximo de 255 caracteres.
+     */
     @Column(name = "location", length = 255, nullable = false)
     private String location;
-    
+
+    /**
+     * Preço do evento. Não pode ser nulo.
+     */
     @Column(name = "price", nullable = false)
     private Double price;
-    
+
+    /**
+     * Data de início do evento.
+     */
     @Column(name = "start_date")
     private LocalDate startDate;
-    
+
+    /**
+     * Data de término do evento.
+     */
     @Column(name = "end_date")
     private LocalDate endDate;
-    
+
+    /**
+     * Horário de início do evento.
+     */
     @Column(name = "start_time")
     private LocalTime startTime;
-    
+
+    /**
+     * Horário de término do evento.
+     */
     @Column(name = "end_time")
     private LocalTime endTime;
 

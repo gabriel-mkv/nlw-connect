@@ -30,9 +30,22 @@ public class SubscriptionService {
 
     @Autowired
     private SubscriptionRepo subRepo;
-    
+
+    /**
+     * Cria uma nova inscrição para um evento.
+     *
+     * @param eventName O "pretty name" do evento.
+     * @param user      O usuário a ser inscrito.  Se o usuário já existir no banco de dados (mesmo email),
+     *                  o usuário existente será usado. Caso contrário, um novo usuário será criado.
+     * @param userId    (Opcional) O ID do usuário que indicou a inscrição. Se fornecido, o usuário com este ID
+     *                  será associado como o indicador. Se não for fornecido, a inscrição não terá um indicador.
+     * @return Um objeto `SubscriptionResponse` contendo o número da inscrição e a URL de acesso.
+     * @throws EventNotFoundException Se o evento com o "pretty name" fornecido não for encontrado.
+     * @throws UserIndicadorNotFoundException Se o `userId` for fornecido, mas o usuário com esse ID não existir.
+     * @throws SubscriptionConflitException Se o usuário já estiver inscrito no evento.
+     */
     public SubscriptionResponse createNewSubscription(String eventName, User user, Integer userId) {
-        
+
         Event evt = evtRepo.findByPrettyName(eventName);
         if (evt == null) {
             throw new EventNotFoundException("Evento " + eventName + " não existe!");
@@ -44,7 +57,7 @@ public class SubscriptionService {
         }
 
         User indicador = null;
-        if (userId != null){
+        if (userId != null) {
             indicador = userRepo.findById(userId).orElse(null);
             if (indicador == null) {
                 throw new UserIndicadorNotFoundException("Usuário " + userId + " indicador não existe!");
@@ -65,6 +78,13 @@ public class SubscriptionService {
         return new SubscriptionResponse(res.getSubscriptionNumber(), "http://codecraft.com/subscription/" + res.getEvent().getPrettyName() + "/" + res.getSubscriber().getId());
     }
 
+    /**
+     * Obtém o ranking completo de um evento.
+     *
+     * @param prettyName O "pretty name" do evento para o qual se deseja obter o ranking.
+     * @return Uma lista de objetos `SubscriptionRankingItem`, representando o ranking dos usuários no evento.
+     * @throws EventNotFoundException Se o evento com o "pretty name" fornecido não for encontrado.
+     */
     public List<SubscriptionRankingItem> getCompleteRanking(String prettyName) {
         Event evt = evtRepo.findByPrettyName(prettyName);
         if (evt == null) {
@@ -73,7 +93,16 @@ public class SubscriptionService {
         return subRepo.generateRanking(evt.getEventId());
     }
 
-    public SubscriptionRankingByUser getRankingByUser(String prettyName,Integer userId) {
+    /**
+     * Obtém a posição de um usuário específico no ranking de um evento.
+     *
+     * @param prettyName O "pretty name" do evento.
+     * @param userId     O ID do usuário para o qual se deseja obter a posição no ranking.
+     * @return Um objeto `SubscriptionRankingByUser` contendo as informações do usuário no ranking, incluindo sua posição.
+     * @throws EventNotFoundException Se o evento com o "pretty name" fornecido não for encontrado (lançado por `getCompleteRanking`).
+     * @throws UserIndicadorNotFoundException Se não houver inscrições com indicação do usuário especificado (ou seja, o usuário não está no ranking).
+     */
+    public SubscriptionRankingByUser getRankingByUser(String prettyName, Integer userId) {
         List<SubscriptionRankingItem> ranking = getCompleteRanking(prettyName);
 
         SubscriptionRankingItem item = ranking.stream().filter(r -> r.userId().equals(userId)).findFirst().orElse(null);
@@ -82,8 +111,8 @@ public class SubscriptionService {
         }
 
         Integer rankingPosition = IntStream.range(0, ranking.size())
-            .filter(pos -> ranking.get(pos).userId().equals(userId))
-            .findFirst().getAsInt();
+                .filter(pos -> ranking.get(pos).userId().equals(userId))
+                .findFirst().getAsInt();
 
         return new SubscriptionRankingByUser(item, rankingPosition + 1);
     }
